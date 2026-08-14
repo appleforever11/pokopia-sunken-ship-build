@@ -93,6 +93,8 @@
     .section-head { display: flex; align-items: end; justify-content: space-between; gap: 1rem; margin: 5px 0 13px; }
     .section-head h2 { margin: 3px 0 5px; color: var(--ink); font-size: clamp(1.45rem, 3vw, 2.35rem); letter-spacing: -.04em; }
     .section-head p { max-width: 760px; margin: 0; color: var(--muted); }
+    .section-head-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
+    .section-head-actions .button { padding: .56rem .72rem; font-size: .72rem; }
     .count-note { color: var(--cyan); font-size: .8rem; font-weight: 850; white-space: nowrap; }
     .notice { margin: 0 0 16px; padding: 12px 14px; border-left: 4px solid var(--aqua); border-radius: 12px; color: #a5cad4; background: rgba(5,41,56,.78); }
     .notice strong { color: var(--ink); }
@@ -209,6 +211,7 @@
     .clip-phase-count { color: var(--cyan); font-size: .68rem; font-weight: 900; white-space: nowrap; }
     .clip-phase-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 12px; }
     .clip-card { overflow: hidden; border: 1px solid var(--line); border-radius: 17px; background: var(--panel); box-shadow: 0 14px 30px rgba(0,0,0,.22); transition: border-color .18s, transform .18s; }
+    .clip-card.is-watched { border-color: #309f76; background: linear-gradient(145deg, rgba(7,47,48,.97), rgba(5,28,44,.95)); }
     .clip-card:hover { transform: translateY(-2px); border-color: var(--line-bright); }
     .clip-media { position: relative; background: #000; }
     .clip-card video { display: block; width: 100%; aspect-ratio: 16/9; background: #000; object-fit: cover; }
@@ -224,7 +227,9 @@
     .clip-speed-label { margin-right: 2px; color: var(--dim); font-size: .59rem; font-weight: 950; letter-spacing: .1em; text-transform: uppercase; }
     .speed-button { border: 1px solid #1b6179; border-radius: 8px; padding: .32rem .48rem; color: #bdeaf1; background: #082b40; font-size: .64rem; font-weight: 900; }
     .speed-button:hover, .speed-button.is-active { color: #04151e; border-color: var(--aqua); background: var(--aqua); }
-    .clip-foot { display: flex; align-items: center; justify-content: space-between; gap: 7px; margin-top: 9px; }
+    .clip-foot { display: flex; align-items: center; flex-wrap: wrap; justify-content: space-between; gap: 7px; margin-top: 9px; }
+    .clip-check { display: inline-flex; align-items: center; gap: .32rem; color: var(--ink); font-size: .68rem; font-weight: 900; cursor: pointer; }
+    .clip-check input { width: 17px; height: 17px; }
     .clip-source { display: inline-flex; padding: .25rem .42rem; border: 1px solid #1b6179; border-radius: 999px; color: var(--cyan); background: #082b40; font-size: .62rem; font-weight: 900; }
     .clip-tip { color: var(--dim); font-size: .62rem; font-weight: 800; }
     .reference-divider { margin-top: 22px; }
@@ -261,7 +266,7 @@
         <div class="eyebrow">BUILD MODE // BUBBLY BASIN</div>
         <h1>Sunken<br><span>Pirate Ship</span></h1>
         <p>Eight visual passes from empty water to the finished multi-deck ship. Watch one focused action at a time, stage the materials, and check off each action as you build.</p>
-        <div class="quick-tags"><span class="tag accent">8 build passes</span><span class="tag">16 focus clips</span><span class="tag">slow-mo controls</span><span class="tag">saved progress</span></div>
+        <div class="quick-tags"><span class="tag accent">8 build passes</span><span class="tag">16 focus clips</span><span class="tag">0.25× extra slow</span><span class="tag">saved progress</span></div>
         <div class="hero-actions"><button class="button primary" type="button" data-go="build">Open build plan ↓</button><button class="button" type="button" data-go="inventory">Open starter bag</button></div>
       </div>
       <div class="hero-art"><button class="image-preview-trigger" type="button" data-preview-asset="goal" data-preview-title="Finished build reference" data-preview-caption="Provided finished-build image · tap or click to enlarge"><img id="heroGoal" alt="Finished sunken pirate ship target reference"><span class="preview-hint">ENLARGE</span></button><div class="hero-caption"><span class="status-pill">GOAL IMAGE · SUPPLIED</span></div></div>
@@ -270,11 +275,12 @@
 
   <main id="workspace">
     <section class="dashboard" aria-label="Build progress">
-      <div class="dash-card progress-card"><div class="progress-ring" id="progressRing"><span id="overallPct">0%</span></div><div><strong id="overallText">0 / 8 steps</strong><span id="overallSub">0 actions · 0 build pieces · 0 bag items</span></div></div>
+      <div class="dash-card progress-card"><div class="progress-ring" id="progressRing"><span id="overallPct">0%</span></div><div><strong id="overallText">0 / 8 steps</strong><span id="overallSub">0 actions · 0 build pieces · 0 bag items · 0 clips</span></div></div>
       <div class="dash-card"><strong id="stepDone">0 / 8</strong><span>steps complete</span></div>
       <div class="dash-card"><strong id="actionDone">0 / 24</strong><span>actions checked</span></div>
       <div class="dash-card"><strong id="itemDone">0 / 21</strong><span>build pieces staged</span></div>
       <div class="dash-card"><strong id="inventoryDone">0 / 21</strong><span>bag items ready</span></div>
+      <div class="dash-card"><strong id="clipDone">0 / 16</strong><span>video clips watched</span></div>
     </section>
 
     <nav class="tabs" aria-label="Ship build sections">
@@ -319,8 +325,8 @@
     </section>
 
     <section class="panel" data-panel="references">
-      <div class="section-head"><div><div class="section-kicker">04 · watch one action at a time</div><h2>Focused video steps</h2><p>Each build pass is split into two tighter source segments so you can see the placement before moving on. Start at 0.5× when the time-lapse feels too fast.</p></div><span class="count-note">16 clips · 8 passes</span></div>
-      <div class="notice"><strong>Slow mode:</strong> every clip starts at 0.5×. Use <code>0.75×</code> for a gentle slowdown or <code>1×</code> for the original pace. Clips are muted, lightweight H.264 MP4, and use <code>playsinline</code> on iPhone.</div>
+      <div class="section-head"><div><div class="section-kicker">04 · watch one action at a time</div><h2>Focused video steps</h2><p>Each build pass is split into two tighter source segments so you can see the placement before moving on. Check a clip as watched after you copy its action.</p></div><div class="section-head-actions"><span class="count-note" id="clipsResult">0 / 16 watched</span><button class="button" id="nextClipButton" type="button">Next unwatched ↓</button></div></div>
+      <div class="notice"><strong>Slow mode:</strong> every clip starts at 0.5×. Use <code>0.25× extra slow</code> for careful placement, <code>0.75×</code> for a gentle slowdown, or <code>1×</code> for the original pace. Your selected speed is remembered for the next clip. Clips are muted, lightweight H.264 MP4, and use <code>playsinline</code> on iPhone.</div>
       <div id="clipsGrid" class="clips-grid" aria-live="polite"></div>
       <div class="section-head reference-divider"><div><div class="section-kicker">still anchors</div><h3>Quick visual jump points</h3></div><span class="count-note">8 stills</span></div>
       <div id="referencesGrid" class="ref-grid"></div>
@@ -359,9 +365,11 @@
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
         const parsed = raw ? JSON.parse(raw) : {};
-        return { steps: parsed.steps || {}, actions: parsed.actions || {}, items: parsed.items || {}, inventory: parsed.inventory || {} };
+        const savedSpeed = Number(parsed.clipSpeed);
+        const clipSpeed = [0.25, 0.5, 0.75, 1].includes(savedSpeed) ? savedSpeed : 0.5;
+        return { steps: parsed.steps || {}, actions: parsed.actions || {}, items: parsed.items || {}, inventory: parsed.inventory || {}, clips: parsed.clips || {}, clipSpeed };
       } catch (error) {
-        return { steps: {}, actions: {}, items: {}, inventory: {} };
+        return { steps: {}, actions: {}, items: {}, inventory: {}, clips: {}, clipSpeed: 0.5 };
       }
     }
     function saveState() {
@@ -372,21 +380,23 @@
       const actions = DATA.steps.reduce((sum, step) => sum + step.actions.filter(([id]) => state.actions[id]).length, 0);
       const items = DATA.items.filter((item) => state.items[item.id]).length;
       const inventory = DATA.inventory.filter((item) => state.inventory[item.id]).length;
-      return { steps, actions, items, inventory };
+      const clips = DATA.clips.filter((clip) => state.clips[clip.id]).length;
+      return { steps, actions, items, inventory, clips };
     }
     function refreshProgress() {
       const counts = completionCounts();
-      const total = DATA.steps.length + actionTotal + DATA.items.length + DATA.inventory.length;
-      const done = counts.steps + counts.actions + counts.items + counts.inventory;
+      const total = DATA.steps.length + actionTotal + DATA.items.length + DATA.inventory.length + DATA.clips.length;
+      const done = counts.steps + counts.actions + counts.items + counts.inventory + counts.clips;
       const pct = total ? Math.round((done / total) * 100) : 0;
       $("#progressRing").style.setProperty("--p", `${pct}%`);
       $("#overallPct").textContent = `${pct}%`;
       $("#overallText").textContent = `${counts.steps} / ${DATA.steps.length} steps`;
-      $("#overallSub").textContent = `${counts.actions} actions · ${counts.items} build pieces · ${counts.inventory} bag items`;
+      $("#overallSub").textContent = `${counts.actions} actions · ${counts.items} build pieces · ${counts.inventory} bag items · ${counts.clips} clips watched`;
       $("#stepDone").textContent = `${counts.steps} / ${DATA.steps.length}`;
       $("#actionDone").textContent = `${counts.actions} / ${actionTotal}`;
       $("#itemDone").textContent = `${counts.items} / ${DATA.items.length}`;
       $("#inventoryDone").textContent = `${counts.inventory} / ${DATA.inventory.length}`;
+      $("#clipDone").textContent = `${counts.clips} / ${DATA.clips.length}`;
     }
     function stepMatches(step, query) {
       const haystack = [step.title, step.label, step.headline, step.tone, step.time, ...step.items.map((id) => itemById(id)?.name || ""), ...step.actions.map(([, text]) => text)].join(" ").toLowerCase();
@@ -456,17 +466,23 @@
       $("#paintGrid").innerHTML = `<div class="finish-card"><h3>Simple paint rule</h3><p>Use Smeargle to add contrast only after the ship already reads in natural wood.</p><div class="palette-grid">${palette}</div><ol class="finish-actions"><li>Keep the main hull, decks, crates, barrels, plants, coral, and stained glass natural.</li><li>Paint deep espresso on lower trim, braces, and a few shadow breaks.</li><li>Paint light tan on step caps, rail tops, and selected sunlit edges.</li><li>Keep sails ivory; use teal or coral only as tiny accents.</li></ol></div><figure class="finish-side finish-image"><button class="image-preview-trigger" type="button" data-preview-asset="paint" data-preview-title="Natural wood + painted accents" data-preview-caption="Finished ship reference · tap or click to enlarge"><img src="${asset("paint")}" alt="Finished ship with natural wood and painted accent contrast"><span class="preview-hint">ENLARGE</span></button><h3>Finish check</h3><p>Back up until the silhouette still reads: bow, stern, decks, masts, and sails.</p><figcaption>Use the goal image only for the final distribution of decoration—not as a requirement to copy every prop.</figcaption></figure>`;
     }
     function clipCard(clip) {
-      return `<article class="clip-card" data-clip-card="${esc(clip.id)}"><div class="clip-media"><video controls playsinline webkit-playsinline muted preload="metadata" poster="${asset(clip.poster)}" data-clip-video="${esc(clip.id)}" aria-label="${esc(clip.title)} video clip"><source src="${esc(clip.src)}" type="video/mp4">Your browser can show the poster image, but the companion MP4 clip was not found. Upload the media folder beside this HTML file.</video><div class="clip-badge"><span>STEP ${esc(clip.step)}${esc(clip.segment)}</span><span>${esc(clip.time)}</span></div></div><div class="clip-copy"><div class="clip-kicker">SOURCE WINDOW · ${esc(clip.time)}</div><div class="clip-title-row"><h3>${esc(clip.title)}</h3><span class="clip-duration">${esc(clip.duration)} sec</span></div><p>${esc(clip.summary)}</p><div class="clip-speed"><span class="clip-speed-label">Playback</span><button class="speed-button is-active" type="button" data-speed="0.5">0.5× slow</button><button class="speed-button" type="button" data-speed="0.75">0.75×</button><button class="speed-button" type="button" data-speed="1">1× normal</button></div><div class="clip-foot"><span class="clip-source">H.264 MP4 · tap play</span><span class="clip-tip">one action per clip</span></div></div></article>`;
+      const watched = Boolean(state.clips[clip.id]);
+      const speeds = [[0.25, "0.25× extra slow"], [0.5, "0.5× slow"], [0.75, "0.75×"], [1, "1× normal"]];
+      const speedButtons = speeds.map(([value, label]) => `<button class="speed-button${state.clipSpeed === value ? " is-active" : ""}" type="button" data-speed="${value}" aria-pressed="${state.clipSpeed === value}">${label}</button>`).join("");
+      return `<article class="clip-card${watched ? " is-watched" : ""}" data-clip-card="${esc(clip.id)}"><div class="clip-media"><video controls playsinline webkit-playsinline muted preload="metadata" poster="${asset(clip.poster)}" data-clip-video="${esc(clip.id)}" aria-label="${esc(clip.title)} video clip"><source src="${esc(clip.src)}" type="video/mp4">Your browser can show the poster image, but the companion MP4 clip was not found. Upload the media folder beside this HTML file.</video><div class="clip-badge"><span>STEP ${esc(clip.step)}${esc(clip.segment)}</span><span>${esc(clip.time)}</span></div></div><div class="clip-copy"><div class="clip-kicker">SOURCE WINDOW · ${esc(clip.time)}</div><div class="clip-title-row"><h3>${esc(clip.title)}</h3><span class="clip-duration">${esc(clip.duration)} sec</span></div><p>${esc(clip.summary)}</p><div class="clip-speed"><span class="clip-speed-label">Playback</span>${speedButtons}</div><div class="clip-foot"><label class="clip-check"><input type="checkbox" data-kind="clips" data-id="${esc(clip.id)}" ${watched ? "checked" : ""}> Watched</label><span class="clip-source">H.264 MP4 · tap play</span><span class="clip-tip">one action per clip</span></div></div></article>`;
     }
     function renderClips() {
-      const groups = DATA.clips.reduce((map, clip) => {
+      const watched = DATA.clips.filter((clip) => state.clips[clip.id]).length;
+      const shown = DATA.clips.filter((clip) => statusMatches(Boolean(state.clips[clip.id])));
+      $("#clipsResult").textContent = `${watched} / ${DATA.clips.length} watched`;
+      const groups = shown.reduce((map, clip) => {
         if (!map[clip.step]) map[clip.step] = { step: clip.step, phase: clip.phase, title: clip.phase_title, clips: [] };
         map[clip.step].clips.push(clip);
         return map;
       }, {});
-      $("#clipsGrid").innerHTML = Object.values(groups).map((group) => `<section class="clip-phase" aria-labelledby="clip-phase-${esc(group.step)}"><header class="clip-phase-head"><div class="clip-phase-title"><span>STEP ${esc(group.step)}</span><strong id="clip-phase-${esc(group.step)}">${esc(group.title)}</strong></div><span class="clip-phase-count">${group.clips.length} focused clips</span></header><div class="clip-phase-grid">${group.clips.map(clipCard).join("")}</div></section>`).join("");
-      $("[data-clip-video]").forEach((video) => {
-        video.playbackRate = 0.5;
+      $("#clipsGrid").innerHTML = Object.values(groups).map((group) => { const groupWatched = group.clips.filter((clip) => state.clips[clip.id]).length; return `<section class="clip-phase" aria-labelledby="clip-phase-${esc(group.step)}"><header class="clip-phase-head"><div class="clip-phase-title"><span>STEP ${esc(group.step)}</span><strong id="clip-phase-${esc(group.step)}">${esc(group.title)}</strong></div><span class="clip-phase-count">${groupWatched} / ${group.clips.length} watched</span></header><div class="clip-phase-grid">${group.clips.map(clipCard).join("")}</div></section>`; }).join("") || `<div class="empty">No video clips match this filter.</div>`;
+      $$("[data-clip-video]").forEach((video) => {
+        video.playbackRate = state.clipSpeed;
         video.addEventListener("play", () => {
           $("video[data-clip-video]").forEach((other) => { if (other !== video) other.pause(); });
         });
@@ -476,8 +492,23 @@
       const card = button.closest("[data-clip-card]");
       const video = card?.querySelector("video[data-clip-video]");
       if (!card || !video) return;
-      video.playbackRate = Number(button.dataset.speed);
-      card.querySelectorAll("[data-speed]").forEach((speedButton) => speedButton.classList.toggle("is-active", speedButton === button));
+      const speed = Number(button.dataset.speed);
+      state.clipSpeed = speed;
+      saveState();
+      $$("video[data-clip-video]").forEach((otherVideo) => {
+        otherVideo.playbackRate = speed;
+        const otherCard = otherVideo.closest("[data-clip-card]");
+        otherCard?.querySelectorAll("[data-speed]").forEach((speedButton) => { const active = Number(speedButton.dataset.speed) === speed; speedButton.classList.toggle("is-active", active); speedButton.setAttribute("aria-pressed", String(active)); });
+      });
+    }
+    function focusNextClip() {
+      if (activeTab !== "references") setActiveTab("references");
+      $("#statusFilter").value = "open";
+      renderClips();
+      const next = $("#clipsGrid .clip-card:not(.is-watched)");
+      if (!next) { $("#statusFilter").value = "all"; renderClips(); alert("All focused clips are marked watched. You can replay any clip from the full list."); return; }
+      next.scrollIntoView({ behavior: "smooth", block: "center" });
+      window.setTimeout(() => next.querySelector("video")?.focus(), 350);
     }
     function renderReferences() {
       $("#referencesGrid").innerHTML = DATA.references.map(([assetName, time, caption]) => `<figure class="reference-card"><button class="image-preview-trigger" type="button" data-preview-asset="${assetName}" data-preview-title="${esc(caption)}" data-preview-caption="Video still / reference · ${esc(time)}"><img src="${asset(assetName)}" alt="${esc(caption)}"><span class="preview-hint">ENLARGE</span></button><figcaption class="reference-copy"><strong>${esc(caption)}</strong><span>${esc(time)} · jump point</span></figcaption></figure>`).join("");
@@ -486,6 +517,7 @@
       if (activeTab === "build") renderSteps();
       if (activeTab === "inventory") renderInventory();
       if (activeTab === "materials") renderMaterials();
+      if (activeTab === "references") { renderClips(); renderReferences(); }
     }
     function setActiveTab(tab) {
       activeTab = tab;
@@ -493,7 +525,7 @@
       $$("[data-panel]").forEach((panel) => panel.classList.toggle("is-active", panel.dataset.panel === tab));
       $("#searchBox").placeholder = tab === "materials" ? "Search build pieces or roles…" : tab === "inventory" ? "Search bag items or uses…" : tab === "build" ? "Search steps, items, or roles…" : "Search is inactive in this view";
       $("#searchBox").disabled = !["build", "materials", "inventory"].includes(tab);
-      $("#statusFilter").disabled = !["build", "materials", "inventory"].includes(tab);
+      $("#statusFilter").disabled = !["build", "materials", "inventory", "references"].includes(tab);
       $("#focusMode").disabled = tab !== "build";
       renderActive();
     }
@@ -528,7 +560,8 @@
     $("#searchBox").addEventListener("input", renderActive);
     $("#statusFilter").addEventListener("change", renderActive);
     $("#focusMode").addEventListener("change", renderSteps);
-    $("#resetButton").addEventListener("click", () => { if (confirm("Clear all ship-build checks?")) { state.steps = {}; state.actions = {}; state.items = {}; state.inventory = {}; saveState(); renderActive(); refreshProgress(); } });
+    $("#resetButton").addEventListener("click", () => { if (confirm("Clear all ship-build checks?")) { state.steps = {}; state.actions = {}; state.items = {}; state.inventory = {}; state.clips = {}; state.clipSpeed = 0.5; saveState(); renderActive(); refreshProgress(); } });
+    $("#nextClipButton").addEventListener("click", focusNextClip);
     document.addEventListener("change", (event) => {
       const input = event.target.closest("input[data-kind]");
       if (!input) return;
